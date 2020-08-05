@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.entando</groupId>
+        <artifactId>entando-core-parent</artifactId>
+        <version>6.2.14</version>
+    </parent>
+    <artifactId>entando-plugin-jpredis</artifactId>
+    <groupId>org.entando.entando.plugins</groupId>
+    <packaging>war</packaging>
+    <name>Entando Plugin: Redis Connector</name>
+    <description>Enables the use of Redis as system library</description>
+    <developers>
+        <developer>
+            <id>e.santoboni</id>
+            <name>Eugenio Santoboni</name>
+            <email>eugenio.santoboni@gmail.com</email>
+        </developer>
+    </developers>
+    <url>http://www.entando.com/</url>
+    <repositories>
+        <repository>
+            <id>nexus-jx</id>
+            <url>https://nexus-jx.apps.serv.run/repository/maven-releases/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+    <properties>
+        <checkstyle.skip>true</checkstyle.skip>
+        <entando-engine.version>6.2.23</entando-engine.version>
+        <entando-admin-console.version>6.2.36</entando-admin-console.version>
+        <entando-portal-ui.version>6.2.6</entando-portal-ui.version>
+        <entando-plugin-jacms.version>6.2.17</entando-plugin-jacms.version>
+    </properties>
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>src/main/resources/component</exclude>
+                </excludes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*component.xml</include>
+                </includes>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.properties</include>
+                    <include>**/*.xml</include>
+                    <include>**/*.xsd</include>
+                    <include>**/*.txt</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/test/java</directory>
+                <includes>
+                    <include>**/*.sql</include>
+                    <include>**/*.json</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/tld</directory>
+                <targetPath>META-INF</targetPath>
+                <includes>
+                    <include>**/*.tld</include>
+                </includes>
+            </resource>
+
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- engine -->
+            <dependency>
+                <groupId>org.entando.entando</groupId>
+                <artifactId>entando-engine</artifactId>
+                <version>${entando-engine.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.entando.entando</groupId>
+                <artifactId>entando-engine</artifactId>
+                <version>${entando-engine.version}</version>
+                <type>test-jar</type>
+                <scope>test</scope>
+            </dependency>
+            <!-- admin-console -->
+            <dependency>
+                <groupId>org.entando.entando</groupId>
+                <artifactId>entando-admin-console</artifactId>
+                <version>${entando-admin-console.version}</version>
+                <classifier>classes</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.entando.entando</groupId>
+                <artifactId>entando-admin-console</artifactId>
+                <version>${entando-admin-console.version}</version>
+                <type>test-jar</type>
+                <scope>test</scope>
+            </dependency>
+            <!-- portal-ui -->
+            <dependency>
+                <groupId>org.entando.entando</groupId>
+                <artifactId>entando-portal-ui</artifactId>
+                <version>${entando-portal-ui.version}</version>
+                <classifier>classes</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.entando.entando</groupId>
+                <artifactId>entando-portal-ui</artifactId>
+                <version>${entando-portal-ui.version}</version>
+                <type>test-jar</type>
+                <scope>test</scope>
+            </dependency>
+            
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson</artifactId>
+            <version>3.12.4</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.entando.entando</groupId>
+            <artifactId>entando-portal-ui</artifactId>
+            <classifier>classes</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet.jsp</groupId>
+            <artifactId>jsp-api</artifactId>
+        </dependency>
+
+        <!--Test dependencies -->
+        
+        <dependency>
+            <groupId>org.entando.entando</groupId>
+            <artifactId>entando-portal-ui</artifactId>
+            <type>test-jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.entando.entando</groupId>
+            <artifactId>entando-engine</artifactId>
+            <type>test-jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.entando.entando</groupId>
+            <artifactId>entando-admin-console</artifactId>
+            <type>test-jar</type>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path-assert</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derbyclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
+        </dependency>
+
+    </dependencies>
+
+</project>
