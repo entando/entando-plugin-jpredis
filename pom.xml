@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.entando</groupId>
         <artifactId>entando-core-parent</artifactId>
-        <version>6.2.14</version>
+        <version>6.2.15</version>
     </parent>
     <artifactId>entando-plugin-jpredis</artifactId>
     <groupId>org.entando.entando.plugins</groupId>
@@ -34,10 +34,6 @@
     </repositories>
     <properties>
         <checkstyle.skip>true</checkstyle.skip>
-        <entando-engine.version>6.2.23</entando-engine.version>
-        <entando-admin-console.version>6.2.36</entando-admin-console.version>
-        <entando-portal-ui.version>6.2.6</entando-portal-ui.version>
-        <entando-plugin-jacms.version>6.2.17</entando-plugin-jacms.version>
     </properties>
     <build>
         <resources>
@@ -101,65 +97,52 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- engine -->
             <dependency>
-                <groupId>org.entando.entando</groupId>
-                <artifactId>entando-engine</artifactId>
-                <version>${entando-engine.version}</version>
+                <groupId>org.entando</groupId>
+                <artifactId>entando-core-bom</artifactId>
+                <version>6.2.11</version>
+                <scope>import</scope>
+                <type>pom</type>
             </dependency>
-            <dependency>
-                <groupId>org.entando.entando</groupId>
-                <artifactId>entando-engine</artifactId>
-                <version>${entando-engine.version}</version>
-                <type>test-jar</type>
-                <scope>test</scope>
-            </dependency>
-            <!-- admin-console -->
-            <dependency>
-                <groupId>org.entando.entando</groupId>
-                <artifactId>entando-admin-console</artifactId>
-                <version>${entando-admin-console.version}</version>
-                <classifier>classes</classifier>
-            </dependency>
-            <dependency>
-                <groupId>org.entando.entando</groupId>
-                <artifactId>entando-admin-console</artifactId>
-                <version>${entando-admin-console.version}</version>
-                <type>test-jar</type>
-                <scope>test</scope>
-            </dependency>
-            <!-- portal-ui -->
-            <dependency>
-                <groupId>org.entando.entando</groupId>
-                <artifactId>entando-portal-ui</artifactId>
-                <version>${entando-portal-ui.version}</version>
-                <classifier>classes</classifier>
-            </dependency>
-            <dependency>
-                <groupId>org.entando.entando</groupId>
-                <artifactId>entando-portal-ui</artifactId>
-                <version>${entando-portal-ui.version}</version>
-                <type>test-jar</type>
-                <scope>test</scope>
-            </dependency>
-            
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
         
         <dependency>
-            <groupId>org.redisson</groupId>
-            <artifactId>redisson</artifactId>
-            <version>3.12.4</version>
+            <groupId>org.entando.entando</groupId>
+            <artifactId>entando-engine</artifactId>
+            <type>jar</type>
         </dependency>
         
         <dependency>
-            <groupId>org.entando.entando</groupId>
-            <artifactId>entando-portal-ui</artifactId>
-            <classifier>classes</classifier>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-redis</artifactId>
+            <version>2.1.9.RELEASE</version>
         </dependency>
-
+        <dependency>
+            <groupId>io.lettuce</groupId>
+            <artifactId>lettuce-core</artifactId>
+            <version>6.0.0.RC1</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <type>jar</type>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <type>jar</type>
+        </dependency>
+        
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
@@ -171,11 +154,6 @@
 
         <!--Test dependencies -->
         
-        <dependency>
-            <groupId>org.entando.entando</groupId>
-            <artifactId>entando-portal-ui</artifactId>
-            <type>test-jar</type>
-        </dependency>
         <dependency>
             <groupId>org.entando.entando</groupId>
             <artifactId>entando-engine</artifactId>
