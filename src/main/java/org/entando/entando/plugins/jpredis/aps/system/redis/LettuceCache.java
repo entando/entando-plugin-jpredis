@@ -23,6 +23,7 @@ import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.lang.Nullable;
 
 /**
+ * Extension of default RedisCache with Client-side caching support
  * @author E.Santoboni
  */
 public class LettuceCache extends RedisCache {

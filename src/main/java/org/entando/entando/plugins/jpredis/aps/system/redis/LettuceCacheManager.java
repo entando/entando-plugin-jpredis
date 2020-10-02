@@ -36,7 +36,8 @@ import org.springframework.util.Assert;
  * {@link org.springframework.cache.CacheManager} backed by a {@link RedisCache Redis} cache.
  * <p />
  * Rewriting of default implementation of redis manager {@link org.springframework.data.redis.cache.RedisCacheManager} 
- * for custom implementation.
+ * for custom implementation. This custom extension allows the manager to create a custom Cache (LettuceCache) with 
+ * Client-side caching support (provided by CacheFrontend instance).
  * This cache manager creates caches by default upon first write. Empty caches are not visible on Redis due to how Redis
  * represents empty data structures.
  * <p />
@@ -65,6 +66,7 @@ public class LettuceCacheManager extends AbstractTransactionSupportingCacheManag
 	 * @param defaultCacheConfiguration must not be {@literal null}. Maybe just use
 	 *          {@link RedisCacheConfiguration#defaultCacheConfig()}.
 	 * @param allowInFlightCacheCreation allow create unconfigured caches.
+     * @param cacheFrontend Allow to add Client-side caching support
 	 * @since 2.0.4
 	 */
 	private LettuceCacheManager(RedisCacheWriter cacheWriter, RedisCacheConfiguration defaultCacheConfiguration,
@@ -114,7 +116,7 @@ public class LettuceCacheManager extends AbstractTransactionSupportingCacheManag
 	 *          {@link RedisCacheConfiguration#defaultCacheConfig()}.
 	 * @param allowInFlightCacheCreation if set to {@literal true} no new caches can be acquire at runtime but limited to
 	 *          the given list of initial cache names.
-     * @param cacheFrontend
+     * @param cacheFrontend Allow to add Client-side caching support
 	 * @param initialCacheNames optional set of known cache names that will be created with given
 	 *          {@literal defaultCacheConfiguration}.
 	 * @since 2.0.4
@@ -136,7 +138,7 @@ public class LettuceCacheManager extends AbstractTransactionSupportingCacheManag
 	 *          {@link RedisCacheConfiguration#defaultCacheConfig()}.
 	 * @param initialCacheConfigurations Map of known cache names along with the configuration to use for those caches.
 	 *          Must not be {@literal null}.
-     * @param cacheFrontend
+     * @param cacheFrontend Allow to add Client-side caching support
 	 */
 	public LettuceCacheManager(RedisCacheWriter cacheWriter, RedisCacheConfiguration defaultCacheConfiguration,
 			Map<String, RedisCacheConfiguration> initialCacheConfigurations, CacheFrontend<String, Object> cacheFrontend) {
@@ -154,7 +156,7 @@ public class LettuceCacheManager extends AbstractTransactionSupportingCacheManag
 	 *          Must not be {@literal null}.
 	 * @param allowInFlightCacheCreation if set to {@literal false} this cache manager is limited to the initial cache
 	 *          configurations and will not create new caches at runtime.
-     * @param cacheFrontend
+     * @param cacheFrontend Allow to add Client-side caching support
 	 * @since 2.0.4
 	 */
 	public LettuceCacheManager(RedisCacheWriter cacheWriter, RedisCacheConfiguration defaultCacheConfiguration,

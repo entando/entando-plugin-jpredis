@@ -31,9 +31,11 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * {@link RedisCacheWriter} Copy (for custom redis connector) of implementation capable of reading/writing binary data from/to Redis in {@literal standalone}
- * and {@literal cluster} environments. Works upon a given {@link RedisConnectionFactory} to obtain the actual
- * {@link RedisConnection}. <br />
+ * {@link RedisCacheWriter} Copy (for custom redis connector) of implementation capable of reading/writing binary data 
+ * from/to Redis in {@literal standalone} and {@literal cluster} environments. 
+ * This copy is necessary to create a custom redis manager {@link LettuceCacheManager} that allows to create 
+ * a custom Cache (LettuceCache) with Client-side caching support (provided by CacheFrontend instance).
+ * Works upon a given {@link RedisConnectionFactory} to obtain the actual {@link RedisConnection}. <br />
  * {@link DefaultRedisCacheWriter} can be used in
  * {@link RedisCacheWriter#lockingRedisCacheWriter(RedisConnectionFactory) locking} or
  * {@link RedisCacheWriter#nonLockingRedisCacheWriter(RedisConnectionFactory) non-locking} mode. While
