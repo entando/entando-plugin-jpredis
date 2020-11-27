@@ -57,7 +57,7 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 /**
  * @author E.Santoboni
  */
-@Aspect
+//@Aspect
 @Configuration
 @ComponentScan
 @EnableCaching
@@ -182,7 +182,7 @@ public class CacheConfig extends CachingConfigurerSupport {
         CacheFrontend<String, Object> cacheFrontend = ClientSideCaching.enable(CacheAccessor.forMap(clientCache), myself, trackingArgs);
         return cacheFrontend;
     }
-
+    /*
     @After("execution(* com.agiletec.apsadmin.admin.BaseAdminAction.reloadConfig())")
     public void executeReloadConfig(JoinPoint joinPoint) {
         CacheFrontend<String, Object> cacheFrontend = this.buildCacheFrontend();
@@ -191,7 +191,7 @@ public class CacheConfig extends CachingConfigurerSupport {
             cache.setCacheFrontend(cacheFrontend);
         });
     }
-
+    */
     private RedisCacheConfiguration buildDefaultConfiguration() {
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ZERO);
         ObjectMapper mapper = new Jackson2ObjectMapperBuilder()
