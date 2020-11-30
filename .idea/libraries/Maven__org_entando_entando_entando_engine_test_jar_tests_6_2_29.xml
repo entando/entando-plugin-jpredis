@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.entando.entando:entando-engine:test-jar:tests:6.2.29">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/entando/entando/entando-engine/6.2.29/entando-engine-6.2.29-tests.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/entando/entando/entando-engine/6.2.29/entando-engine-6.2.29-test-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/entando/entando/entando-engine/6.2.29/entando-engine-6.2.29-test-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
