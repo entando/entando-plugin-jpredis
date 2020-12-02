@@ -46,3 +46,7 @@ pipelineConfig:
             name: join-networks
           - sh: mvn-deploy-release -Dredis.address=redis://redis.${REPO_NAME}-${PIPELINE_CODE}-release.svc.cluster.local:6379
             name: mvn-deploy-release
+      promote:
+        steps:
+          - name: update bom
+            sh: update-bom
