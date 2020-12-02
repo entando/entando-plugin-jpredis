@@ -26,7 +26,7 @@ pipelineConfig:
             name: jx-preview
 # join the network of the newly created project wit the jx namespace so that the maven JVM running in jx can connect to the redis service
           - sh:  >-
-              kubectl patch netnamespace ${REPO_NAME}-${PIPELINE_CODE}pr${PULL_NUMBER} -p "{'netid': '${JX_NETID}'}"
+              kubectl patch netnamespace ${REPO_NAME}-${PIPELINE_CODE}pr${PULL_NUMBER} -p "{\"netid\": ${JX_NETID}}"
             name: join-networks
           - sh: mvn-verify-pr -Dredis.address=redis://redis.${REPO_NAME}-${PIPELINE_CODE}pr${PULL_NUMBER}.svc.cluster.local
             name: mvn-verify-pr
