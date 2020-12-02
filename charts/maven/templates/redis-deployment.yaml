@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    deployment: redis
+  name: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      deployment: redis
+  template:
+    metadata:
+      labels:
+        deployment: redis
+      name: redis-pod
+    spec:
+      volumes:
+        - name: data
+          emptyDir: {}
+      containers:
+        - image: "{{ .Values.redisImage }}"
+          name: redis-container
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          ports:
+            - containerPort: 6379
+              name: redis-port
+              protocol: TCP
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            initialDelaySeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            initialDelaySeconds: 30
+            timeoutSeconds: 5
