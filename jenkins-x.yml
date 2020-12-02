@@ -28,5 +28,5 @@ pipelineConfig:
           - sh:  >-
               kubectl patch netnamespace ${REPO_NAME}-${PIPELINE_CODE}pr${PULL_NUMBER} -p "{\"netid\": ${JX_NETID}}"
             name: join-networks
-          - sh: mvn-verify-pr -Dredis.address=redis://redis.${REPO_NAME}-${PIPELINE_CODE}pr${PULL_NUMBER}.svc.cluster.local
+          - sh: mvn-verify-pr -Dredis.address=redis://redis.${REPO_NAME}-${PIPELINE_CODE}pr${PULL_NUMBER}.svc.cluster.local:6379
             name: mvn-verify-pr
