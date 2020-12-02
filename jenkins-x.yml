@@ -44,7 +44,5 @@ pipelineConfig:
           - sh:  >-
               kubectl patch netnamespace ${REPO_NAME}-${PIPELINE_CODE}-release -p "{\"netid\": ${JX_NETID}}"
             name: join-networks
-          - sh: mvn-verify-pr -Dredis.address=redis://redis.${REPO_NAME}-${PIPELINE_CODE}-release.svc.cluster.local:6379
-            name: mvn-verify-pr
-          - sh: mvn-deploy-release
+          - sh: mvn-deploy-release -Dredis.address=redis://redis.${REPO_NAME}-${PIPELINE_CODE}-release.svc.cluster.local:6379
             name: mvn-deploy-release
