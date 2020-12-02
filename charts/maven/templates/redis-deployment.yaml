@@ -15,9 +15,15 @@ spec:
         deployment: redis
       name: redis-pod
     spec:
+      volumes:
+        - name: data
+          emptyDir: {}
       containers:
         - image: "{{ .Values.redisImage }}"
           name: redis-container
+          volumeMounts:
+            - name: data
+              mountPath: /data
           ports:
             - containerPort: 6379
               name: redis-port
