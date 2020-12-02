@@ -9,3 +9,24 @@ pipelineConfig:
       value: "true"
     - name: UPDATE_OWASP_DB
       value: "false"
+    - name: JX_NETID #TODO read this from our secret
+      value: "8099474"
+  pipelines:
+    pullRequest:
+      build:
+        replace: true  #because we are replacing the standard build phase in the entando-maven-lib buildpack (
+        steps:
+          - sh: mvn versions:set -DnewVersion=$PREVIEW_VERSION
+            name: set-version
+          - sh: fix-git-branches
+            name: fix-git-for-sonar
+#run the maven chart to deploy redis
+          - dir: charts/maven
+            sh: jx preview --name ${REPO_NAME}-${PIPELINE_CODE}pr${PULL_NUMBER} --app $APP_NAME --dir ../.. --namespace ${REPO_NAME}-${PIPELINE_CODE}pr${PULL_NUMBER}
+            name: jx-preview
+# join the network of the newly created project wit the jx namespace so that the maven JVM running in jx can connect to the redis service
+          - sh:  >-
+              kubectl patch netnamespace ${REPO_NAME}-${PIPELINE_CODE}pr${PULL_NUMBER} -p "{'netid': '${JX_NETID}'}"
+            name: join-networks
+          - sh: mvn-verify-pr -Dredis.address=redis://redis.${REPO_NAME}-${PIPELINE_CODE}pr${PULL_NUMBER}.svc.cluster.local
+            name: mvn-verify-pr
