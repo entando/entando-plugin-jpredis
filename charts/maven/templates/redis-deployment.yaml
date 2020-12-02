@@ -16,7 +16,7 @@ spec:
       name: redis-pod
     spec:
       containers:
-          image: "{{ .Values.redisImage }}"
+        - image: "{{ .Values.redisImage }}"
           name: redis-container
           ports:
             - containerPort: 6379
