@@ -13,41 +13,57 @@
  */
 package org.entando.entando.plugins.jpredis.aps.system.services;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import com.agiletec.aps.BaseTestCase;
 import com.agiletec.aps.system.SystemConstants;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import org.entando.entando.aps.system.services.cache.CacheInfoManager;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Classe test del servizio gestore cache.
  *
  * @author E.Santoboni
  */
-public class CacheInfoManagerIntegrationTest extends BaseTestCase {
+class CacheInfoManagerIntegrationTest {
 
 	private static final String DEFAULT_CACHE = CacheInfoManager.DEFAULT_CACHE_NAME;
 
 	private CacheInfoManager cacheInfoManager = null;
     
-	@Override
-	protected void setUp() throws Exception {
+	@BeforeAll
+	public static void setUpRedis() throws Exception {
         ProcessBuilder processBuilder = new ProcessBuilder();
         processBuilder.command("bash", "-c", "docker-compose up -d");
-        this.executeCommand(processBuilder);
-        super.setUp();
-		this.init();
+        executeCommand(processBuilder);
+        BaseTestCase.setUp();
 	}
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-        ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command("bash", "-c", "docker-compose stop && docker-compose rm -f");
-        this.executeCommand(processBuilder);
+    
+    @BeforeEach
+    public void init() throws Exception {
+        try {
+            cacheInfoManager = (CacheInfoManager) BaseTestCase.getApplicationContext().getBean(SystemConstants.CACHE_INFO_MANAGER);
+        } catch (Throwable t) {
+            throw new Exception(t);
+        }
     }
     
-    private void executeCommand(ProcessBuilder processBuilder) throws Exception {
+    @AfterAll
+    public static void tearDownRedis() throws Exception {
+        BaseTestCase.tearDown();
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        processBuilder.command("bash", "-c", "docker-compose stop && docker-compose rm -f");
+        executeCommand(processBuilder);
+    }
+    
+    private static void executeCommand(ProcessBuilder processBuilder) throws Exception {
         try {
             Process process = processBuilder.start();
             StringBuilder output = new StringBuilder();
@@ -67,8 +83,13 @@ public class CacheInfoManagerIntegrationTest extends BaseTestCase {
             throw e;
         }
     }
-
-	public void testPutGetFromCache_1() {
+    
+    @Test
+	void testPutGetFromCache_1() {
+        System.out.println("xxxxyXXXXXXXXXXxxxxxx");
+        System.out.println("xxxxyXXXXXXXXXXxxxxxx");
+        System.out.println("xxxxyXXXXXXXXXXxxxxxx");
+        System.out.println("xxxxyXXXXXXXXXXxxxxxx");
 		String value = "Stringa prova";
 		String key = "Chiave_prova";
 		this.cacheInfoManager.putInCache(DEFAULT_CACHE, key, value);
@@ -79,7 +100,8 @@ public class CacheInfoManagerIntegrationTest extends BaseTestCase {
 		assertNull(extracted);
 	}
     
-	public void testPutGetFromCache_2() {
+    @Test
+	void testPutGetFromCache_2() {
 		String key = "Chiave_prova";
 		Object extracted = this.cacheInfoManager.getFromCache(DEFAULT_CACHE, key);
 		assertNull(extracted);
@@ -97,7 +119,8 @@ public class CacheInfoManagerIntegrationTest extends BaseTestCase {
 		assertNull(extracted);
 	}
 
-	public void testPutGetFromCacheOnRefreshPeriod() throws Throwable {
+	@Test
+	void testPutGetFromCacheOnRefreshPeriod() throws Throwable {
 		String value = "Stringa prova";
 		String key = "Chiave prova";
 		this.cacheInfoManager.putInCache(DEFAULT_CACHE, key, value);
@@ -111,7 +134,8 @@ public class CacheInfoManagerIntegrationTest extends BaseTestCase {
 		assertNull(extracted);
 	}
 
-	public void testPutGetFromCacheGroup() {
+	@Test
+	void testPutGetFromCacheGroup() {
 		String value = "Stringa prova";
 		String key = "Chiave prova";
 		String group1 = "group1";
@@ -124,12 +148,4 @@ public class CacheInfoManagerIntegrationTest extends BaseTestCase {
 		assertNull(extracted);
 	}
     
-	private void init() throws Exception {
-		try {
-			cacheInfoManager = (CacheInfoManager) this.getService(SystemConstants.CACHE_INFO_MANAGER);
-		} catch (Throwable t) {
-			throw new Exception(t);
-		}
-	}
-
 }
