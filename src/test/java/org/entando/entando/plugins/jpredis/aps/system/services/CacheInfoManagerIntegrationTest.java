@@ -86,10 +86,6 @@ class CacheInfoManagerIntegrationTest {
     
     @Test
 	void testPutGetFromCache_1() {
-        System.out.println("xxxxyXXXXXXXXXXxxxxxx");
-        System.out.println("xxxxyXXXXXXXXXXxxxxxx");
-        System.out.println("xxxxyXXXXXXXXXXxxxxxx");
-        System.out.println("xxxxyXXXXXXXXXXxxxxxx");
 		String value = "Stringa prova";
 		String key = "Chiave_prova";
 		this.cacheInfoManager.putInCache(DEFAULT_CACHE, key, value);
