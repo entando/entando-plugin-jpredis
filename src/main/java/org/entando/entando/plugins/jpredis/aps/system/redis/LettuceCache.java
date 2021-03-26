@@ -65,8 +65,4 @@ public class LettuceCache extends RedisCache {
         return super.get(key, valueLoader);
     }
     
-    protected void setCacheFrontend(CacheFrontend<String, Object> frontendCache) {
-        this.frontendCache = frontendCache;
-    }
-    
 }
