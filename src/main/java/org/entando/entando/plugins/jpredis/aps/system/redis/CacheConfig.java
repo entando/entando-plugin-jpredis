@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-Present Entando Inc. (http://www.entando.com) All rights reserved.
+ * Copyright 2021-Present Entando Inc. (http://www.entando.com) All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -25,18 +25,20 @@ import io.lettuce.core.support.caching.CacheFrontend;
 import io.lettuce.core.support.caching.ClientSideCaching;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
-import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.After;
-import org.aspectj.lang.annotation.Aspect;
+import org.entando.entando.aps.system.services.cache.ExternalCachesContainer;
 import org.entando.entando.aps.system.services.cache.ICacheInfoManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
@@ -67,6 +69,9 @@ public class CacheConfig extends CachingConfigurerSupport {
 
     private static final String REDIS_PREFIX = "redis://";
 
+    @Value("${REDIS_ACTIVE:false}")
+    private boolean active;
+
     @Value("${REDIS_ADDRESS:redis://localhost:6379}")
     private String redisAddress;
 
@@ -78,6 +83,13 @@ public class CacheConfig extends CachingConfigurerSupport {
 
     @Value("${REDIS_PASSWORD:}")
     private String redisPassword;
+    
+    @Autowired
+    @Qualifier(value = "entandoDefaultCaches")
+    private Collection<Cache> defaultCaches;
+    
+    @Autowired(required = false)
+    private List<ExternalCachesContainer> defaultExternalCachesContainers;
 
     private CacheManager cacheManagerBean;
 
@@ -87,6 +99,9 @@ public class CacheConfig extends CachingConfigurerSupport {
 
     @Bean
     public LettuceConnectionFactory redisConnectionFactory() {
+        if (!this.active) {
+            return new LettuceConnectionFactory();
+        }
         if (!StringUtils.isBlank(this.redisAddresses)) {
             logger.warn("** Redis Cluster with sentinel configuration - the master node will be the first node defined in REDIS_ADDRESSES parameter **");
             String[] addresses = this.redisAddresses.split(",");
@@ -108,6 +123,7 @@ public class CacheConfig extends CachingConfigurerSupport {
             }
             return new LettuceConnectionFactory(sentinelConfig);
         } else {
+            logger.info("** Redis with single node configuration **");
             RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
             String[] sections = this.redisAddress.substring(REDIS_PREFIX.length()).split(":");
             redisStandaloneConfiguration.setHostName(sections[0]);
@@ -122,6 +138,14 @@ public class CacheConfig extends CachingConfigurerSupport {
     @Primary
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
+        if (!this.active) {
+            logger.warn("** Redis not active **");
+            DefaultEntandoCacheManager defaultCacheManager = new DefaultEntandoCacheManager();
+            defaultCacheManager.setCaches(this.defaultCaches);
+            defaultCacheManager.setExternalCachesContainers(this.getDefaultExternalCachesContainers());
+            defaultCacheManager.afterPropertiesSet();
+            return defaultCacheManager;
+        }
         RedisCacheConfiguration redisCacheConfiguration = this.buildDefaultConfiguration();
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
         // time to leave = 4 Hours
@@ -139,7 +163,6 @@ public class CacheConfig extends CachingConfigurerSupport {
     protected CacheFrontend<String, Object> buildCacheFrontend() {
         DefaultClientResources resources = DefaultClientResources.builder().build();
         StatefulRedisConnection<String, Object> myself = null;
-        TrackingArgs trackingArgs = null;
         if (!StringUtils.isBlank(this.redisAddresses)) {
             logger.warn("** Client-side caching doesn't work on Redis Cluster and sharding data environments but only for Master/Slave environments (with sentinel) **");
             List<String> purgedAddresses = new ArrayList<>();
@@ -167,7 +190,6 @@ public class CacheConfig extends CachingConfigurerSupport {
             RedisClient lettuceClient = new RedisClient(resources, redisUri) {
             };
             myself = lettuceClient.connect(new SerializedObjectCodec());
-            trackingArgs = TrackingArgs.Builder.enabled().bcast();
         } else {
             RedisURI redisUri = RedisURI.create((this.redisAddress.startsWith(REDIS_PREFIX)) ? this.redisAddress : REDIS_PREFIX + this.redisAddress);
             if (!StringUtils.isBlank(this.redisPassword)) {
@@ -176,8 +198,8 @@ public class CacheConfig extends CachingConfigurerSupport {
             RedisClient lettuceClient = new RedisClient(resources, redisUri) {
             };
             myself = lettuceClient.connect(new SerializedObjectCodec());
-            trackingArgs = TrackingArgs.Builder.enabled().noloop();
         }
+        TrackingArgs trackingArgs = TrackingArgs.Builder.enabled().bcast();
         Map<String, Object> clientCache = new ConcurrentHashMap<>();
         CacheFrontend<String, Object> cacheFrontend = ClientSideCaching.enable(CacheAccessor.forMap(clientCache), myself, trackingArgs);
         return cacheFrontend;
@@ -205,9 +227,15 @@ public class CacheConfig extends CachingConfigurerSupport {
     protected CacheManager getCacheManagerBean() {
         return cacheManagerBean;
     }
-
     protected void setCacheManagerBean(CacheManager cacheManagerBean) {
         this.cacheManagerBean = cacheManagerBean;
+    }
+
+    protected List<ExternalCachesContainer> getDefaultExternalCachesContainers() {
+        return defaultExternalCachesContainers;
+    }
+    protected void setDefaultExternalCachesContainers(List<ExternalCachesContainer> defaultExternalCachesContainers) {
+        this.defaultExternalCachesContainers = defaultExternalCachesContainers;
     }
 
 }
