@@ -9,6 +9,7 @@
     </parent>
     <artifactId>entando-plugin-jpredis</artifactId>
     <groupId>org.entando.entando.plugins</groupId>
+    <version>6.3.0-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>Entando Plugin: Redis Connector</name>
     <description>Enables the use of Redis as system library</description>
@@ -128,7 +129,7 @@
         <dependency>
             <groupId>io.lettuce</groupId>
             <artifactId>lettuce-core</artifactId>
-            <version>6.0.1.RELEASE</version>
+            <version>6.0.3.RELEASE</version>
         </dependency>
         
         <dependency>
