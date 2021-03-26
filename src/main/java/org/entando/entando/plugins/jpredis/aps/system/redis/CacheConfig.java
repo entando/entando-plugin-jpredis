@@ -176,7 +176,7 @@ public class CacheConfig extends CachingConfigurerSupport {
                 }
             }
             String[] sectionForMaster = purgedAddresses.get(0).split(":");
-            RedisURI.Builder uriBuilder = RedisURI.Builder.sentinel(sectionForMaster[0], Integer.parseInt(sectionForMaster[1]), "mymaster");
+            RedisURI.Builder uriBuilder = RedisURI.Builder.sentinel(sectionForMaster[0], Integer.parseInt(sectionForMaster[1]), this.redisMasterName);
             if (addresses.length > 1) {
                 for (int i = 1; i < purgedAddresses.size(); i++) {
                     String[] sectionForSlave = purgedAddresses.get(i).split(":");
