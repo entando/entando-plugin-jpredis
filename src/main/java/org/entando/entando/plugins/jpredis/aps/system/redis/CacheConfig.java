@@ -149,7 +149,7 @@ public class CacheConfig extends CachingConfigurerSupport {
         RedisCacheConfiguration redisCacheConfiguration = this.buildDefaultConfiguration();
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
         // time to leave = 4 Hours
-        cacheConfigurations.put(ICacheInfoManager.DEFAULT_CACHE_NAME, createCacheConfiguration(4 * 60 * 60));
+        cacheConfigurations.put(ICacheInfoManager.DEFAULT_CACHE_NAME, createCacheConfiguration(4L * 60 * 60));
         CacheFrontend<String, Object> cacheFrontend = this.buildCacheFrontend();
         LettuceCacheManager manager = LettuceCacheManager
                 .builder(redisConnectionFactory)
