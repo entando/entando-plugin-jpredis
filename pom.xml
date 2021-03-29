@@ -5,11 +5,11 @@
     <parent>
         <groupId>org.entando</groupId>
         <artifactId>entando-core-parent</artifactId>
-        <version>6.2.20</version>
+        <version>6.3.0</version>
     </parent>
     <artifactId>entando-plugin-jpredis</artifactId>
     <groupId>org.entando.entando.plugins</groupId>
-    <version>6.2.0-SNAPSHOT</version>
+    <version>6.3.0-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>Entando Plugin: Redis Connector</name>
     <description>Enables the use of Redis as system library</description>
@@ -35,8 +35,6 @@
     </repositories>
     <properties>
         <checkstyle.skip>true</checkstyle.skip>
-        <allTestsSuiteClass>org.entando.entando.plugins.jpredis.AllTests</allTestsSuiteClass>
-        <redis.address>redis://localhost:6380</redis.address>
     </properties>
     <build>
         <resources>
@@ -96,55 +94,20 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <environmentVariables>
-                        <REDIS_ADDRESS>${redis.address}</REDIS_ADDRESS>
+                        <REDIS_ADDRESS>redis://localhost:6380</REDIS_ADDRESS>
+                        <REDIS_ACTIVE>true</REDIS_ACTIVE>
                     </environmentVariables>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-    <profiles>
-        <profile>
-            <id>docker</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <version>3.0.0</version>
-                        <executions>
-                            <execution>
-                                <id>Start redis docker container</id>
-                                <phase>process-test-resources</phase>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-                                <configuration>
-                                    <executable>${basedir}/scripts/start.sh</executable>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>Stop redis docker container</id>
-                                <phase>test</phase>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-                                <configuration>
-                                    <executable>${basedir}/scripts/stop.sh</executable>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.entando</groupId>
                 <artifactId>entando-core-bom</artifactId>
-                <version>6.2.170</version>
+                <version>6.2.213</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -167,7 +130,7 @@
         <dependency>
             <groupId>io.lettuce</groupId>
             <artifactId>lettuce-core</artifactId>
-            <version>6.0.0.RC1</version>
+            <version>6.0.3.RELEASE</version>
         </dependency>
         
         <dependency>
@@ -209,16 +172,20 @@
             <type>test-jar</type>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
+            <artifactId>mockito-junit-jupiter</artifactId>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
@@ -240,7 +207,7 @@
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
         </dependency>
-
+        
     </dependencies>
 
 </project>
