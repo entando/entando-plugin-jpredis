@@ -13,5 +13,7 @@
 			http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
     
     <context:component-scan base-package="org.entando.entando.plugins.jpredis.aps.system.redis" />
+
+    <bean id="NotifyManager" class="org.entando.entando.plugins.jpredis.aps.system.notify.RedisNotifyManager" />
     
 </beans>
