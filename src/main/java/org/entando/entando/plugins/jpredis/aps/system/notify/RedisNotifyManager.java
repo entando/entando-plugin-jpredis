@@ -26,11 +26,11 @@ public class RedisNotifyManager extends NotifyManager {
     
     private static final Logger logger = EntLogFactory.getSanitizedLogger(RedisNotifyManager.class);
     
-    private StatefulRedisPubSubConnection<String, String> pubConn;
-    private StatefulRedisPubSubConnection<String, String> subConn;
+    private transient StatefulRedisPubSubConnection<String, String> pubConn;
+    private transient StatefulRedisPubSubConnection<String, String> subConn;
     
     @Autowired(required = false)
-    private RedisClient lettuceClient;
+    private transient RedisClient redisClient;
     
     public void destroy() {
         if (null != pubConn) {
@@ -46,7 +46,7 @@ public class RedisNotifyManager extends NotifyManager {
         if (null != event.getObserverInterface()) {
             super.notify(event);
         }
-        if (null == this.lettuceClient) {
+        if (null == this.redisClient) {
             return;
         }
         if (null != event.getChannel() && null != event.getMessage()) {
@@ -57,8 +57,8 @@ public class RedisNotifyManager extends NotifyManager {
         }
     }
 
-    public void addListener(String channel, RedisPubSubListener listener) {
-        if (null == this.lettuceClient) {
+    public void addListener(String channel, RedisPubSubListener<String, String> listener) {
+        if (null == this.redisClient) {
             logger.warn("Redis not active - listener not added");
             return;
         }
@@ -69,14 +69,14 @@ public class RedisNotifyManager extends NotifyManager {
     
     private StatefulRedisPubSubConnection<String, String> getSubConnection() {
         if (null == this.subConn) {
-            subConn = this.lettuceClient.connectPubSub();
+            subConn = this.redisClient.connectPubSub();
         }
         return this.subConn;
     }
     
     private StatefulRedisPubSubConnection<String, String> getPubConnection() {
         if (null == this.pubConn) {
-            subConn = this.lettuceClient.connectPubSub();
+            subConn = this.redisClient.connectPubSub();
         }
         return this.subConn;
     }
