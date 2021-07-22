@@ -12,7 +12,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class RedisNotifyManagerTest {
+class RedisNotifyManagerTest {
 
     @Mock
     private RedisClient redisClient;
@@ -39,10 +39,12 @@ public class RedisNotifyManagerTest {
         Mockito.verify(redisClient, Mockito.times(1)).connectPubSub();
         Mockito.verify(commands, Mockito.times(1)).subscribe(Mockito.anyString());
         Mockito.verify(commands, Mockito.times(0)).publish(Mockito.anyString(), Mockito.anyString());
+        redisNotifyManager.destroy();
+        Mockito.verify(connection, Mockito.times(1)).close();
     }
 
     @Test
-    void testNotifyEveny_1() throws Exception {
+    void testNotifyEvent_1() throws Exception {
         Mockito.when(redisClient.connectPubSub()).thenReturn(null);
         TestEvent event = new TestEvent("testchannel", new HashMap<>());
         redisNotifyManager.notify(event);
@@ -50,7 +52,7 @@ public class RedisNotifyManagerTest {
     }
 
     @Test
-    void testNotifyEveny_2() throws Exception {
+    void testNotifyEvent_2() throws Exception {
         StatefulRedisPubSubConnection<String, String> connection = Mockito.mock(StatefulRedisPubSubConnection.class);
         Mockito.when(redisClient.connectPubSub()).thenReturn(connection);
         RedisPubSubAsyncCommands commands = Mockito.mock(RedisPubSubAsyncCommands.class);
@@ -60,6 +62,8 @@ public class RedisNotifyManagerTest {
         Mockito.verify(redisClient, Mockito.times(1)).connectPubSub();
         Mockito.verify(commands, Mockito.times(0)).subscribe(Mockito.anyString());
         Mockito.verify(commands, Mockito.times(1)).publish(Mockito.anyString(), Mockito.anyString());
+        redisNotifyManager.destroy();
+        Mockito.verify(connection, Mockito.times(1)).close();
     }
 
 }

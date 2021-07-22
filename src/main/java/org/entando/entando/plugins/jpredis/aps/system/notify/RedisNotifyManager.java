@@ -52,9 +52,9 @@ public class RedisNotifyManager extends NotifyManager {
         if (null != event.getChannel() && null != event.getMessage()) {
             String channel = event.getChannel();
             String message = event.getMessage();
-            StatefulRedisPubSubConnection<String, String> pubConn = this.getPubConnection();
-            if (null != pubConn) {
-                pubConn.async().publish(channel, message);
+            StatefulRedisPubSubConnection<String, String> pubConnection = this.getPubConnection();
+            if (null != pubConnection) {
+                pubConnection.async().publish(channel, message);
             } else {
                 logger.error("notify - null StatefulRedisPubSubConnection from RedisClient {} ", this.redisClient);
             }

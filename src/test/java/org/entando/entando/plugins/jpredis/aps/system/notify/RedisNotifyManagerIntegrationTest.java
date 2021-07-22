@@ -53,7 +53,7 @@ class RedisNotifyManagerIntegrationTest extends BaseTestCase {
 
         redisNotifyManager.notify(event);
         synchronized (this) {
-            wait(1000);
+            wait(2000);
         }
         Assertions.assertEquals(1, listener.getCounts().size());
         Assertions.assertEquals(1, listener.getMessages().size());
