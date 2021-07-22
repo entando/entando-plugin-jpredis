@@ -59,7 +59,6 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 /**
  * @author E.Santoboni
  */
-//@Aspect
 @Configuration
 @ComponentScan
 @EnableCaching
@@ -137,7 +136,7 @@ public class CacheConfig extends CachingConfigurerSupport {
 
     @Primary
     @Bean
-    public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
+    public CacheManager cacheManager(RedisClient lettuceClient, RedisConnectionFactory redisConnectionFactory) {
         if (!this.active) {
             logger.warn("** Redis not active **");
             DefaultEntandoCacheManager defaultCacheManager = new DefaultEntandoCacheManager();
@@ -150,7 +149,7 @@ public class CacheConfig extends CachingConfigurerSupport {
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
         // time to leave = 4 Hours
         cacheConfigurations.put(ICacheInfoManager.DEFAULT_CACHE_NAME, createCacheConfiguration(4L * 60 * 60));
-        CacheFrontend<String, Object> cacheFrontend = this.buildCacheFrontend();
+        CacheFrontend<String, Object> cacheFrontend = this.buildCacheFrontend(lettuceClient);
         LettuceCacheManager manager = LettuceCacheManager
                 .builder(redisConnectionFactory)
                 .cacheDefaults(redisCacheConfiguration)
@@ -160,9 +159,13 @@ public class CacheConfig extends CachingConfigurerSupport {
         return manager;
     }
 
-    protected CacheFrontend<String, Object> buildCacheFrontend() {
+    @Bean
+    public RedisClient getRedisClient() {
+        if (!this.active) {
+            return null;
+        }
         DefaultClientResources resources = DefaultClientResources.builder().build();
-        StatefulRedisConnection<String, Object> myself = null;
+        RedisClient lettuceClient = null;
         if (!StringUtils.isBlank(this.redisAddresses)) {
             logger.warn("** Client-side caching doesn't work on Redis Cluster and sharding data environments but only for Master/Slave environments (with sentinel) **");
             List<String> purgedAddresses = new ArrayList<>();
@@ -187,33 +190,25 @@ public class CacheConfig extends CachingConfigurerSupport {
             if (!StringUtils.isBlank(this.redisPassword)) {
                 redisUri.setPassword(this.redisPassword.toCharArray());
             }
-            RedisClient lettuceClient = new RedisClient(resources, redisUri) {
-            };
-            myself = lettuceClient.connect(new SerializedObjectCodec());
+            lettuceClient = new RedisClient(resources, redisUri) {};
         } else {
             RedisURI redisUri = RedisURI.create((this.redisAddress.startsWith(REDIS_PREFIX)) ? this.redisAddress : REDIS_PREFIX + this.redisAddress);
             if (!StringUtils.isBlank(this.redisPassword)) {
                 redisUri.setPassword(this.redisPassword.toCharArray());
             }
-            RedisClient lettuceClient = new RedisClient(resources, redisUri) {
-            };
-            myself = lettuceClient.connect(new SerializedObjectCodec());
+            lettuceClient = new RedisClient(resources, redisUri) {};
         }
+        return lettuceClient;
+    }
+
+    protected CacheFrontend<String, Object> buildCacheFrontend(RedisClient lettuceClient) {
+        StatefulRedisConnection<String, Object> myself = lettuceClient.connect(new SerializedObjectCodec());
         TrackingArgs trackingArgs = TrackingArgs.Builder.enabled().bcast();
         Map<String, Object> clientCache = new ConcurrentHashMap<>();
         CacheFrontend<String, Object> cacheFrontend = ClientSideCaching.enable(CacheAccessor.forMap(clientCache), myself, trackingArgs);
         return cacheFrontend;
     }
-    /*
-    @After("execution(* com.agiletec.apsadmin.admin.BaseAdminAction.reloadConfig())")
-    public void executeReloadConfig(JoinPoint joinPoint) {
-        CacheFrontend<String, Object> cacheFrontend = this.buildCacheFrontend();
-        this.getCacheManagerBean().getCacheNames().stream().forEach(cacheName -> {
-            LettuceCache cache = (LettuceCache) this.getCacheManagerBean().getCache(cacheName);
-            cache.setCacheFrontend(cacheFrontend);
-        });
-    }
-    */
+    
     private RedisCacheConfiguration buildDefaultConfiguration() {
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ZERO);
         ObjectMapper mapper = new Jackson2ObjectMapperBuilder()
