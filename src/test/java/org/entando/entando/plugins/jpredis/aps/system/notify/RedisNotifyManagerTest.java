@@ -1,79 +1,65 @@
 package org.entando.entando.plugins.jpredis.aps.system.notify;
 
-import com.agiletec.aps.BaseTestCase;
-import com.agiletec.aps.system.common.notify.ApsEvent;
-import com.agiletec.aps.system.services.lang.events.LangsChangedEvent;
-import io.lettuce.core.internal.LettuceFactories;
-import io.lettuce.core.pubsub.RedisPubSubListener;
+import io.lettuce.core.RedisClient;
+import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
+import io.lettuce.core.pubsub.api.async.RedisPubSubAsyncCommands;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import org.apache.neethi.Assertion;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-class RedisNotifyManagerTest extends BaseTestCase {
+@ExtendWith(MockitoExtension.class)
+public class RedisNotifyManagerTest {
 
-    private RedisNotifyManager redisNotifyManager = null;
+    @Mock
+    private RedisClient redisClient;
 
-    @BeforeEach
-    public void init() throws Exception {
-        try {
-            redisNotifyManager = BaseTestCase.getApplicationContext().getBean(RedisNotifyManager.class);
-        } catch (Throwable t) {
-            throw new Exception(t);
-        }
-    }
-
-    @Test
-    void testNotifyEvent() throws Exception {
-        DefaultRedisPubSubListener listener = this.createListener();
-        Assertions.assertNotNull(this.redisNotifyManager);
-        this.redisNotifyManager.addListener("testchannel", listener);
-        LangsChangedEvent event = new LangsChangedEvent();
-        redisNotifyManager.notify(event);
-        synchronized (this) {
-            wait(1000);
-        }
-        Assertions.assertEquals(1, listener.getCounts().size());
-        Assertions.assertEquals(0, listener.getMessages().size());
-    }
+    @InjectMocks
+    private RedisNotifyManager redisNotifyManager;
 
     @Test
-    void testNotifyCustomEvent() throws Exception {
-        DefaultRedisPubSubListener listener = this.createListener();
-        Assertions.assertEquals(0, listener.getMessages().size());
-        Assertions.assertEquals(0, listener.getCounts().size());
-
-        Assertions.assertNotNull(this.redisNotifyManager);
+    void testSubscribeListener_1() throws Exception {
+        DefaultRedisPubSubListener listener = Mockito.mock(DefaultRedisPubSubListener.class);
+        Mockito.when(redisClient.connectPubSub()).thenReturn(null);
         redisNotifyManager.addListener("testchannel", listener);
-        Map<String, String> properties = new HashMap<>();
-        properties.put("aaa", "111");
-        properties.put("bbb", "222");
-        properties.put("ccc", "333");
-        TestEvent event = new TestEvent("testchannel", properties);
-
-        redisNotifyManager.notify(event);
-        synchronized (this) {
-            wait(1000);
-        }
-        Assertions.assertEquals(1, listener.getCounts().size());
-        Assertions.assertEquals(1, listener.getMessages().size());
-        String received = listener.getMessages().take();
-        Assertions.assertNotNull(received);
-        Map<String, String> extractedProperties = TestEvent.getProperties(received);
-        Assertions.assertEquals(3, extractedProperties.size());
-        Assertions.assertEquals("111", extractedProperties.get("aaa"));
-        Assertions.assertEquals("222", extractedProperties.get("bbb"));
-        Assertions.assertEquals("333", extractedProperties.get("ccc"));
+        Mockito.verify(redisClient, Mockito.times(1)).connectPubSub();
     }
 
-    private DefaultRedisPubSubListener createListener() {
-        BlockingQueue<String> messages = LettuceFactories.newBlockingQueue();
-        BlockingQueue<String> channels = LettuceFactories.newBlockingQueue();
-        BlockingQueue<Long> counts = LettuceFactories.newBlockingQueue();
-        return new DefaultRedisPubSubListener(messages, channels, counts);
+    @Test
+    void testSubscribeListener_2() throws Exception {
+        DefaultRedisPubSubListener listener = Mockito.mock(DefaultRedisPubSubListener.class);
+        StatefulRedisPubSubConnection<String, String> connection = Mockito.mock(StatefulRedisPubSubConnection.class);
+        Mockito.when(redisClient.connectPubSub()).thenReturn(connection);
+        RedisPubSubAsyncCommands commands = Mockito.mock(RedisPubSubAsyncCommands.class);
+        Mockito.when(connection.async()).thenReturn(commands);
+        redisNotifyManager.addListener("testchannel", listener);
+        Mockito.verify(redisClient, Mockito.times(1)).connectPubSub();
+        Mockito.verify(commands, Mockito.times(1)).subscribe(Mockito.anyString());
+        Mockito.verify(commands, Mockito.times(0)).publish(Mockito.anyString(), Mockito.anyString());
+    }
+
+    @Test
+    void testNotifyEveny_1() throws Exception {
+        Mockito.when(redisClient.connectPubSub()).thenReturn(null);
+        TestEvent event = new TestEvent("testchannel", new HashMap<>());
+        redisNotifyManager.notify(event);
+        Mockito.verify(redisClient, Mockito.times(1)).connectPubSub();
+    }
+
+    @Test
+    void testNotifyEveny_2() throws Exception {
+        StatefulRedisPubSubConnection<String, String> connection = Mockito.mock(StatefulRedisPubSubConnection.class);
+        Mockito.when(redisClient.connectPubSub()).thenReturn(connection);
+        RedisPubSubAsyncCommands commands = Mockito.mock(RedisPubSubAsyncCommands.class);
+        Mockito.when(connection.async()).thenReturn(commands);
+        TestEvent event = new TestEvent("testchannel", new HashMap<>());
+        redisNotifyManager.notify(event);
+        Mockito.verify(redisClient, Mockito.times(1)).connectPubSub();
+        Mockito.verify(commands, Mockito.times(0)).subscribe(Mockito.anyString());
+        Mockito.verify(commands, Mockito.times(1)).publish(Mockito.anyString(), Mockito.anyString());
     }
 
 }

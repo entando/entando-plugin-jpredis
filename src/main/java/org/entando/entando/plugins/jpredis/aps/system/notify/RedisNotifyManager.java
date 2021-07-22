@@ -52,8 +52,12 @@ public class RedisNotifyManager extends NotifyManager {
         if (null != event.getChannel() && null != event.getMessage()) {
             String channel = event.getChannel();
             String message = event.getMessage();
-            pubConn = this.getPubConnection();
-            pubConn.async().publish(channel, message);
+            StatefulRedisPubSubConnection<String, String> pubConn = this.getPubConnection();
+            if (null != pubConn) {
+                pubConn.async().publish(channel, message);
+            } else {
+                logger.error("notify - null StatefulRedisPubSubConnection from RedisClient {} ", this.redisClient);
+            }
         }
     }
 
@@ -62,9 +66,14 @@ public class RedisNotifyManager extends NotifyManager {
             logger.warn("Redis not active - listener not added");
             return;
         }
-        this.getSubConnection().addListener(listener);
-        this.getSubConnection().sync().subscribe(channel);
-        logger.info("Registered listener {} - channel {}", listener.getClass().getName(), channel);
+        StatefulRedisPubSubConnection<String, String> connection = this.getSubConnection();
+        if (null != connection) {
+            connection.addListener(listener);
+            connection.async().subscribe(channel);
+            logger.info("Registered listener {} - channel {}", listener.getClass().getName(), channel);
+        } else {
+            logger.error("subscribe - null StatefulRedisPubSubConnection from RedisClient {} ", this.redisClient);
+        }
     }
     
     private StatefulRedisPubSubConnection<String, String> getSubConnection() {
