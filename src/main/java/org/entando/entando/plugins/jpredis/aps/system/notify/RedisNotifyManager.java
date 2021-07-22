@@ -85,9 +85,9 @@ public class RedisNotifyManager extends NotifyManager {
     
     private StatefulRedisPubSubConnection<String, String> getPubConnection() {
         if (null == this.pubConn) {
-            subConn = this.redisClient.connectPubSub();
+            pubConn = this.redisClient.connectPubSub();
         }
-        return this.subConn;
+        return this.pubConn;
     }
 
 }
