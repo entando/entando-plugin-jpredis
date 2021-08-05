@@ -136,7 +136,7 @@ public class CacheConfig extends CachingConfigurerSupport {
 
     @Primary
     @Bean
-    public CacheManager cacheManager(RedisClient lettuceClient, RedisConnectionFactory redisConnectionFactory) {
+    public CacheManager cacheManager(@Autowired(required = false) RedisClient lettuceClient, RedisConnectionFactory redisConnectionFactory) {
         if (!this.active) {
             logger.warn("** Redis not active **");
             DefaultEntandoCacheManager defaultCacheManager = new DefaultEntandoCacheManager();
