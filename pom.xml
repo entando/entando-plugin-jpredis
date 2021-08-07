@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.entando</groupId>
         <artifactId>entando-core-parent</artifactId>
-        <version>6.4.8</version>
+        <version>6.4.23</version>
     </parent>
     <artifactId>entando-plugin-jpredis</artifactId>
     <groupId>org.entando.entando.plugins</groupId>
-    <version>6.4.4</version>
+    <version>6.4.0-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>Entando Plugin: Redis Connector</name>
     <description>Enables the use of Redis as system library</description>
@@ -219,7 +220,7 @@
             <dependency>
                 <groupId>org.entando</groupId>
                 <artifactId>entando-core-bom</artifactId>
-                <version>6.4.71</version>
+                <version>6.4.77</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
