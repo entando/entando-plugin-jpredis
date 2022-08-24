@@ -5,11 +5,11 @@
     <parent>
         <groupId>org.entando</groupId>
         <artifactId>entando-core-parent</artifactId>
-        <version>7.1.0-ENG-3917-PR-131</version>
+        <version>7.2.0-ENG-4134-PR-137</version>
     </parent>
     <artifactId>entando-plugin-jpredis</artifactId>
     <groupId>org.entando.entando.plugins</groupId>
-    <version>7.1.0-SNAPSHOT</version>
+    <version>7.2.0-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>Entando Plugin: Redis Connector</name>
     <description>Enables the use of Redis as system library</description>
@@ -45,7 +45,7 @@
         <owaspSuppressionFileLocation>
             https://raw.githubusercontent.com/entando/entando-core-parent/v${project.parent.version}/owasp-dependency-check-suppression.xml
         </owaspSuppressionFileLocation>
-        <entando-core-bom.version>7.1.0-ENG-3917</entando-core-bom.version>
+        <entando-core-bom.version>7.2.0-ENG-4134</entando-core-bom.version>
     </properties>
     <build>
         <resources>
