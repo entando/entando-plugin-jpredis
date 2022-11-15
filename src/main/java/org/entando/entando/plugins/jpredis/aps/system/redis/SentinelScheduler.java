@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import org.entando.entando.ent.exception.EntRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,10 +41,10 @@ public class SentinelScheduler extends TimerTask {
 		this.timer = new Timer();
         Calendar startTime = Calendar.getInstance();
         startTime.add(Calendar.SECOND, delaySeconds);
-		this.timer.schedule(this, startTime.getTime(), delaySeconds*1000);
+		this.timer.schedule(this, startTime.getTime(), delaySeconds*1000l);
         List<Map<String, String>> masters = lettuceClient.connectSentinel().sync().masters();
         this.currentMasterIp = (!masters.isEmpty()) ? masters.get(0).get("ip") : null;
-        logger.info("CURRENT master node '" + this.currentMasterIp + "'");
+        logger.info("CURRENT master node '{}'", this.currentMasterIp);
 	}
 	
 	@Override
@@ -58,12 +59,12 @@ public class SentinelScheduler extends TimerTask {
             List<Map<String, String>> masters = lettuceClient.connectSentinel().sync().masters();
             String ip = (!masters.isEmpty()) ? masters.get(0).get("ip") : null;
             if (null != this.currentMasterIp && !this.currentMasterIp.equals(ip)) {
-                logger.info("Refresh of front-end-cache -> from master node '" + this.currentMasterIp + "' to '" + ip + "'");
+                logger.info("Refresh of front-end-cache -> from master node '{}' to ip '{}'", this.currentMasterIp, ip);
                 cacheConfig.rebuildCacheFrontend(this.lettuceClient);
                 this.currentMasterIp = ip;
             }
-        } catch (Throwable t) {
-            throw new RuntimeException("Error on executing TimerTask", t);
+        } catch (Exception e) {
+            throw new EntRuntimeException("Error on executing TimerTask", e);
         }
     }
 	
