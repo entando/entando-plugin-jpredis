@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import org.entando.entando.ent.exception.EntRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +64,7 @@ public class SentinelScheduler extends TimerTask {
                 this.currentMasterIp = ip;
             }
         } catch (Exception e) {
-            throw new RuntimeException("Error on executing TimerTask", e);
+            throw new EntRuntimeException("Error on executing TimerTask", e);
         }
     }
 	

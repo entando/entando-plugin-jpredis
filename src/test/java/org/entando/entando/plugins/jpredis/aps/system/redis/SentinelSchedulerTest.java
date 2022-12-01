@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import org.entando.entando.ent.exception.EntRuntimeException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -119,7 +120,7 @@ class SentinelSchedulerTest {
     @Test
     void failRunScheduler() throws Exception {
         SentinelScheduler scheduler = new SentinelScheduler(lettuceClient, 1, cacheConfig);
-        Assertions.assertThrows(RuntimeException.class, () -> {
+        Assertions.assertThrows(EntRuntimeException.class, () -> {
             Mockito.doThrow(RuntimeException.class).when(this.cacheConfig).rebuildCacheFrontend(this.lettuceClient);
             try {
                 scheduler.run();
