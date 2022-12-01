@@ -20,6 +20,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import com.agiletec.aps.BaseTestCase;
 import com.agiletec.aps.system.SystemConstants;
 import org.entando.entando.aps.system.services.cache.CacheInfoManager;
+import org.entando.entando.plugins.jpredis.RedisTestUtils;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -28,13 +31,25 @@ import org.junit.jupiter.api.Test;
  *
  * @author E.Santoboni
  */
-class CacheInfoManagerIntegrationTest extends BaseTestCase {
+class CacheInfoManagerIntegrationTest {
 
 	private static final String DEFAULT_CACHE = CacheInfoManager.DEFAULT_CACHE_NAME;
 
 	private CacheInfoManager cacheInfoManager = null;
 
-	@BeforeEach
+	@BeforeAll
+    public static void startUp() throws Exception {
+        RedisTestUtils.startContainer(false);
+        BaseTestCase.setUp();
+    }
+    
+    @AfterAll
+    public static void tearDown() throws Exception {
+        BaseTestCase.tearDown();
+        RedisTestUtils.stopContainer();
+    }
+
+    @BeforeEach
     public void init() throws Exception {
         try {
             cacheInfoManager = (CacheInfoManager) BaseTestCase.getApplicationContext().getBean(SystemConstants.CACHE_INFO_MANAGER);
@@ -44,13 +59,16 @@ class CacheInfoManagerIntegrationTest extends BaseTestCase {
     }
     
     @Test
-	void testPutGetFromCache_1() {
+	void testPutGetFromCache_1() throws Throwable {
 		String value = "Stringa prova";
 		String key = "Chiave_prova";
 		this.cacheInfoManager.putInCache(DEFAULT_CACHE, key, value);
 		Object extracted = this.cacheInfoManager.getFromCache(DEFAULT_CACHE, key);
 		assertEquals(value, extracted);
 		this.cacheInfoManager.flushEntry(DEFAULT_CACHE, key);
+		synchronized (this) {
+			this.wait(1000);
+		}
 		extracted = this.cacheInfoManager.getFromCache(DEFAULT_CACHE, key);
 		assertNull(extracted);
 	}

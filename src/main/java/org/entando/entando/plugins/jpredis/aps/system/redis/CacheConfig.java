@@ -199,8 +199,8 @@ public class CacheConfig extends CachingConfigurerSupport {
             RedisURI.Builder uriBuilder = RedisURI.builder();
             if (addresses.length > 1) {
                 for (int i = 0; i < purgedAddresses.size(); i++) {
-                    String[] sectionForSlave = purgedAddresses.get(i).split(":");
-                    uriBuilder.withSentinel(sectionForSlave[0], Integer.parseInt(sectionForSlave[1]));
+                    String[] sections = purgedAddresses.get(i).split(":");
+                    uriBuilder.withSentinel(sections[0], Integer.parseInt(sections[1]));
                 }
             }
             RedisURI redisUri = uriBuilder.build();

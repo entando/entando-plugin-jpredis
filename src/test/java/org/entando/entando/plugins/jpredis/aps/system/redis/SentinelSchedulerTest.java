@@ -18,16 +18,14 @@ import static org.mockito.Mockito.when;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.sentinel.api.StatefulRedisSentinelConnection;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import org.entando.entando.aps.system.services.oauth2.model.ConsumerRecordVO;
-import org.entando.entando.ent.exception.EntException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -36,10 +34,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
  * @author E.Santoboni
  */
 @ExtendWith(MockitoExtension.class)
-public class SentinelSchedulerTest {
+class SentinelSchedulerTest {
     
     @Mock
     private Map<String, String> master;
+    
+    @Mock
+    private RedisSentinelCommands commands;
     
     @Mock
     private RedisClient lettuceClient;
@@ -48,14 +49,13 @@ public class SentinelSchedulerTest {
     private CacheConfig cacheConfig;
     
     @BeforeEach
-    public void setUp() throws Exception {
+    void setUp() throws Exception {
         StatefulRedisSentinelConnection connection = Mockito.mock(StatefulRedisSentinelConnection.class);
         when(this.lettuceClient.connectSentinel()).thenReturn(connection);
-        RedisSentinelCommands commands = Mockito.mock(RedisSentinelCommands.class);
-        when(connection.sync()).thenReturn(commands);
+        when(connection.sync()).thenReturn(this.commands);
         List<Map<String, String>> masters = Arrays.asList(master);
         when(commands.masters()).thenReturn(masters);
-        when(master.get("ip")).thenReturn("myMaster").thenReturn("mySecondMaster");
+        Mockito.lenient().when(master.get("ip")).thenReturn("myMaster").thenReturn("mySecondMaster");
     }
     
     @Test
@@ -80,6 +80,15 @@ public class SentinelSchedulerTest {
         Mockito.verify(master, Mockito.times(2)).get("ip");
         Mockito.verify(cacheConfig, Mockito.times(1)).rebuildCacheFrontend(this.lettuceClient);
         scheduler.cancel();
+    }
+    
+    @Test
+    void runScheduler_3() throws Exception {
+        when(commands.masters()).thenReturn(new ArrayList());
+        SentinelScheduler scheduler = new SentinelScheduler(lettuceClient, 1, cacheConfig);
+        scheduler.run();
+        Mockito.verify(master, Mockito.times(0)).get("ip");
+        Mockito.verify(cacheConfig, Mockito.times(0)).rebuildCacheFrontend(this.lettuceClient);
     }
     
     @Test

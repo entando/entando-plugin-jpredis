@@ -6,13 +6,28 @@ import io.lettuce.core.internal.LettuceFactories;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import org.entando.entando.plugins.jpredis.RedisTestUtils;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class RedisNotifyManagerIntegrationTest extends BaseTestCase {
+class RedisNotifyManagerIntegrationTest {
 
     private RedisNotifyManager redisNotifyManager = null;
+    
+    @BeforeAll
+    public static void startUp() throws Exception {
+        RedisTestUtils.startContainer(false);
+        BaseTestCase.setUp();
+    }
+    
+    @AfterAll
+    public static void tearDown() throws Exception {
+        BaseTestCase.tearDown();
+        RedisTestUtils.stopContainer();
+    }
 
     @BeforeEach
     public void init() throws Exception {
