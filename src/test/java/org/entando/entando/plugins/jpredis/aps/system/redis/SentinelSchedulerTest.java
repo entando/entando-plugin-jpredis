@@ -16,6 +16,9 @@ package org.entando.entando.plugins.jpredis.aps.system.redis;
 import static org.mockito.Mockito.when;
 
 import io.lettuce.core.RedisClient;
+import io.lettuce.core.StatefulRedisConnectionImpl;
+import io.lettuce.core.api.sync.RedisCommands;
+import io.lettuce.core.codec.RedisCodec;
 import io.lettuce.core.sentinel.api.StatefulRedisSentinelConnection;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
 import java.util.ArrayList;
@@ -29,6 +32,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cache.CacheManager;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * @author E.Santoboni
@@ -89,6 +94,26 @@ class SentinelSchedulerTest {
         scheduler.run();
         Mockito.verify(master, Mockito.times(0)).get("ip");
         Mockito.verify(cacheConfig, Mockito.times(0)).rebuildCacheFrontend(this.lettuceClient);
+    }
+    
+    @Test
+    void runScheduler_4() throws Exception {
+        CacheConfig config = new CacheConfig();
+        CacheManager mockCacheManager = Mockito.mock(CacheManager.class);
+        ReflectionTestUtils.setField(config, "cacheManagerBean", mockCacheManager);
+        when(mockCacheManager.getCacheNames()).thenReturn(Arrays.asList("cache1", "cache2"));
+        LettuceCache cache = Mockito.mock(LettuceCache.class);
+        when(mockCacheManager.getCache(Mockito.anyString())).thenReturn(cache);
+        StatefulRedisConnectionImpl connection = Mockito.mock(StatefulRedisConnectionImpl.class);
+        when(lettuceClient.connect(Mockito.any(RedisCodec.class))).thenReturn(connection);
+        RedisCommands mockCommands = Mockito.mock(RedisCommands.class);
+        when(connection.sync()).thenReturn(mockCommands);
+        SentinelScheduler scheduler = new SentinelScheduler(lettuceClient, 1, config);
+        ReflectionTestUtils.setField(config, "scheduler", scheduler);
+        scheduler.run();
+        Mockito.verify(master, Mockito.times(2)).get("ip");
+        Mockito.verify(cache, Mockito.times(2)).setFrontendCache(Mockito.any());
+        scheduler.cancel();
     }
     
     @Test
