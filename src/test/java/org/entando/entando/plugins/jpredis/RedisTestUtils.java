@@ -34,7 +34,7 @@ public class RedisTestUtils {
     
     public static void stopContainer() throws Exception {
         ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command("bash", "-c", "docker compose stop && docker-compose rm -f");
+        processBuilder.command("bash", "-c", "docker compose stop && docker compose rm -f");
         executeCommand(processBuilder);
     }
     
