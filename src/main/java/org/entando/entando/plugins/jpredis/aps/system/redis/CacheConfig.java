@@ -29,7 +29,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.annotation.PreDestroy;
 import org.apache.commons.lang3.StringUtils;
 import org.entando.entando.aps.system.services.cache.ExternalCachesContainer;
 import org.entando.entando.aps.system.services.cache.ICacheInfoManager;
@@ -83,9 +85,14 @@ public class CacheConfig extends CachingConfigurerSupport {
     @Value("${REDIS_PASSWORD:}")
     private String redisPassword;
     
+    @Value("${REDIS_FEC_CHECK_DELAY_SEC:100}")
+    private int frontEndCacheCheckDelay;
+    
     @Autowired
     @Qualifier(value = "entandoDefaultCaches")
     private Collection<Cache> defaultCaches;
+    
+    private TimerTask scheduler;
     
     @Autowired(required = false)
     private List<ExternalCachesContainer> defaultExternalCachesContainers;
@@ -94,6 +101,14 @@ public class CacheConfig extends CachingConfigurerSupport {
 
     private static RedisCacheConfiguration createCacheConfiguration(long timeoutInSeconds) {
         return RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofSeconds(timeoutInSeconds));
+    }
+    
+    @PreDestroy
+    public void destroy() {
+        if (null != this.scheduler) {
+            this.scheduler.cancel();
+            this.scheduler = null;
+        }
     }
 
     @Bean
@@ -156,6 +171,9 @@ public class CacheConfig extends CachingConfigurerSupport {
                 .cacheFrontend(cacheFrontend)
                 .withInitialCacheConfigurations(cacheConfigurations).build();
         this.setCacheManagerBean(manager);
+        if (!StringUtils.isBlank(this.redisAddresses)) {
+            this.scheduler = new SentinelScheduler(lettuceClient, this.frontEndCacheCheckDelay, this);
+        }
         return manager;
     }
 
@@ -178,15 +196,15 @@ public class CacheConfig extends CachingConfigurerSupport {
                     purgedAddresses.add(address.trim().substring(REDIS_PREFIX.length()));
                 }
             }
-            String[] sectionForMaster = purgedAddresses.get(0).split(":");
-            RedisURI.Builder uriBuilder = RedisURI.Builder.sentinel(sectionForMaster[0], Integer.parseInt(sectionForMaster[1]), this.redisMasterName);
+            RedisURI.Builder uriBuilder = RedisURI.builder();
             if (addresses.length > 1) {
-                for (int i = 1; i < purgedAddresses.size(); i++) {
-                    String[] sectionForSlave = purgedAddresses.get(i).split(":");
-                    uriBuilder.withSentinel(sectionForSlave[0], Integer.parseInt(sectionForSlave[1]));
+                for (int i = 0; i < purgedAddresses.size(); i++) {
+                    String[] sections = purgedAddresses.get(i).split(":");
+                    uriBuilder.withSentinel(sections[0], Integer.parseInt(sections[1]));
                 }
             }
             RedisURI redisUri = uriBuilder.build();
+            redisUri.setSentinelMasterId(this.redisMasterName);
             if (!StringUtils.isBlank(this.redisPassword)) {
                 redisUri.setPassword(this.redisPassword.toCharArray());
             }
@@ -207,6 +225,17 @@ public class CacheConfig extends CachingConfigurerSupport {
         Map<String, Object> clientCache = new ConcurrentHashMap<>();
         CacheFrontend<String, Object> cacheFrontend = ClientSideCaching.enable(CacheAccessor.forMap(clientCache), myself, trackingArgs);
         return cacheFrontend;
+    }
+    
+    protected void rebuildCacheFrontend(RedisClient lettuceClient) {
+        CacheFrontend<String, Object> cacheFrontend = this.buildCacheFrontend(lettuceClient);
+        Collection<String> cacheNames = this.getCacheManagerBean().getCacheNames();
+        for (String cacheName : cacheNames) {
+            Cache cache = this.getCacheManagerBean().getCache(cacheName);
+            if (cache instanceof LettuceCache) {
+                ((LettuceCache) cache).setFrontendCache(cacheFrontend);
+            }
+        }
     }
     
     private RedisCacheConfiguration buildDefaultConfiguration() {

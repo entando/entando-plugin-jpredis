@@ -35,6 +35,10 @@ public class LettuceCache extends RedisCache {
     
 	protected LettuceCache(String name, RedisCacheWriter cacheWriter, RedisCacheConfiguration cacheConfig, CacheFrontend<String, Object> cacheFrontend) {
 		super(name, cacheWriter, cacheConfig);
+        this.setFrontendCache(cacheFrontend);
+    }
+    
+    protected void setFrontendCache(CacheFrontend<String, Object> cacheFrontend) {
         this.frontendCache = cacheFrontend;
     }
     
