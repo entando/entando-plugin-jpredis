@@ -1,6 +1,6 @@
 package org.entando.entando.plugins.jpredis.aps.system.redis.conditions;
 
-import java.util.List;
+import java.util.Collections;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -64,8 +64,8 @@ abstract class BaseRedisConditionTest {
     }
 
     void mockConditionalAnnotation(boolean value) {
-        LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-        map.put("value", List.of(true));
+        LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<String, Object>();
+        map.put("value", Collections.singletonList(true));
         Mockito.when(metadata.getAllAnnotationAttributes(conditionalAnnotation.getName())).thenReturn(map);
     }
 }

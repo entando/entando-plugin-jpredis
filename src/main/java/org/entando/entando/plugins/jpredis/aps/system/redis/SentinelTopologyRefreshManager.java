@@ -74,7 +74,7 @@ public class SentinelTopologyRefreshManager {
     }
 
     private RedisPubSubAdapter<String, String> getSwitchMasterListener() {
-        return new RedisPubSubAdapter<>() {
+        return new RedisPubSubAdapter<String, String>() {
             @Override
             public void message(String pattern, String channel, String message) {
                 log.debug("pattern: {}, channel: {}, message: {}", pattern, channel, message);

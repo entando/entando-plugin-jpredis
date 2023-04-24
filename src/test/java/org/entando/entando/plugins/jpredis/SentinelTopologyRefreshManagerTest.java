@@ -7,6 +7,7 @@ import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import io.lettuce.core.pubsub.api.sync.RedisPubSubCommands;
 import io.lettuce.core.sentinel.api.StatefulRedisSentinelConnection;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.entando.entando.plugins.jpredis.aps.system.redis.CacheFrontendManager;
@@ -24,7 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith({MockitoExtension.class})
 class SentinelTopologyRefreshManagerTest {
 
-    private static final List<Map<String, String>> DEFAULT_MASTER = List.of(Map.of("ip", "redis1"));
+    private static final List<Map<String, String>> DEFAULT_MASTER = Collections.singletonList(Collections.singletonMap("ip", "redis1"));
 
     @Mock
     private RedisClient redisClient;
@@ -41,7 +42,7 @@ class SentinelTopologyRefreshManagerTest {
 
     @BeforeEach
     void setUp() {
-        Mockito.when(redisURI.getSentinels()).thenReturn(List.of(Mockito.mock(RedisURI.class)));
+        Mockito.when(redisURI.getSentinels()).thenReturn(Collections.singletonList(Mockito.mock(RedisURI.class)));
         Mockito.when(redisClient.connectPubSub(Mockito.any(RedisURI.class))).thenReturn(pubSubConnection);
         Mockito.when(pubSubConnection.sync()).thenReturn(pubSubCommands);
     }
@@ -59,7 +60,7 @@ class SentinelTopologyRefreshManagerTest {
 
     @Test
     void shouldRebuildCacheFrontendIfMasterIsChangedAndMasterWasNotInitiallyDetected() {
-        mockMastersList(List.of());
+        mockMastersList(Collections.emptyList());
         mockRebuildCacheFrontend();
         ArgumentCaptor<RedisPubSubAdapter> listenerCaptor = ArgumentCaptor.forClass(RedisPubSubAdapter.class);
         Mockito.doNothing().when(pubSubConnection).addListener(listenerCaptor.capture());
@@ -103,7 +104,7 @@ class SentinelTopologyRefreshManagerTest {
     }
 
     private void mockRebuildCacheFrontend() {
-        Mockito.when(cacheManager.getCacheNames()).thenReturn(List.of("cache1"));
+        Mockito.when(cacheManager.getCacheNames()).thenReturn(Collections.singletonList("cache1"));
         Mockito.when(cacheManager.getCache("cache1")).thenReturn(Mockito.mock(LettuceCache.class));
     }
 }
