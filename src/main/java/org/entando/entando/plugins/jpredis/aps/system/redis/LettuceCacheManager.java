@@ -257,6 +257,10 @@ public class LettuceCacheManager extends AbstractTransactionSupportingCacheManag
 		return new LettuceCache(name, cacheWriter, cacheConfig != null ? cacheConfig : defaultCacheConfig, this.cacheFrontend);
 	}
 
+	public void updateCacheFrontend(CacheFrontend<String, Object> cacheFrontend) {
+		this.cacheFrontend = cacheFrontend;
+	}
+
 	/**
 	 * Configurator for creating {@link RedisCacheManager}.
 	 *

@@ -17,7 +17,6 @@ import io.lettuce.core.support.caching.CacheFrontend;
 import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.Cache.ValueWrapper;
 import org.springframework.data.redis.cache.RedisCache;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheWriter;
@@ -37,7 +36,11 @@ public class LettuceCache extends RedisCache {
 		super(name, cacheWriter, cacheConfig);
         this.frontendCache = cacheFrontend;
     }
-    
+
+    protected void setFrontendCache(CacheFrontend<String, Object> cacheFrontend) {
+        this.frontendCache = cacheFrontend;
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public <T> T get(Object key, @Nullable Class<T> type) {
