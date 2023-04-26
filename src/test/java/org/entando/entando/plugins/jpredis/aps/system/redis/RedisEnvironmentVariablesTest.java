@@ -3,11 +3,16 @@ package org.entando.entando.plugins.jpredis.aps.system.redis;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class RedisEnvironmentVariablesTest {
+class RedisEnvironmentVariablesTest {
 
     @Test
     void testActive() {
         Assertions.assertTrue(RedisEnvironmentVariables.active());
+    }
+
+    @Test
+    void testSessionActive() {
+        Assertions.assertFalse(RedisEnvironmentVariables.redisSessionActive());
     }
 
     @Test

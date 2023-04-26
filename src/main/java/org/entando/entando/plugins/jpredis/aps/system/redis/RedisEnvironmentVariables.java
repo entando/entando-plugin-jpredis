@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 public final class RedisEnvironmentVariables {
 
     private static final String REDIS_ACTIVE = "REDIS_ACTIVE";
+    private static final String REDIS_SESSION_ACTIVE = "REDIS_SESSION_ACTIVE";
     private static final String REDIS_ADDRESS = "REDIS_ADDRESS";
     private static final String REDIS_ADDRESSES = "REDIS_ADDRESSES";
     private static final String REDIS_MASTER_NAME = "REDIS_MASTER_NAME";
@@ -30,6 +31,10 @@ public final class RedisEnvironmentVariables {
 
     public static boolean active() {
         return Boolean.toString(true).equals(System.getenv(REDIS_ACTIVE));
+    }
+
+    public static boolean redisSessionActive() {
+        return active() && Boolean.toString(true).equals(System.getenv(REDIS_SESSION_ACTIVE));
     }
 
     public static boolean sentinelActive() {
