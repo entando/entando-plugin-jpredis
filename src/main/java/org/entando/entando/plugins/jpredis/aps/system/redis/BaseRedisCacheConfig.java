@@ -42,7 +42,7 @@ public class BaseRedisCacheConfig extends CachingConfigurerSupport {
 
     @Bean(destroyMethod = "shutdown")
     public DefaultClientResources defaultClientResources() {
-        return DefaultClientResources.builder().build();
+        return DefaultClientResources.builder().ioThreadPoolSize(RedisEnvironmentVariables.ioThreadPoolSize()).build();
     }
 
     @Primary

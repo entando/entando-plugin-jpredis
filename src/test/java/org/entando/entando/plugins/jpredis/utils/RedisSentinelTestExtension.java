@@ -58,6 +58,7 @@ public class RedisSentinelTestExtension implements BeforeAllCallback, AfterAllCa
         mockedRedisEnvironment.when(() -> RedisEnvironmentVariables.redisAddresses())
                 .thenReturn(String.join(",", Collections.nCopies(2, "redis://localhost:" +
                         composeContainer.getServicePort(REDIS_SENTINEL_SERVICE, REDIS_SENTINEL_PORT))));
+        mockedRedisEnvironment.when(() -> RedisEnvironmentVariables.ioThreadPoolSize()).thenReturn(8);
     }
 
     @Override

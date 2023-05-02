@@ -26,6 +26,11 @@ class RedisEnvironmentVariablesTest {
     }
 
     @Test
+    void testIoThreadPoolSize() {
+        Assertions.assertEquals(8, RedisEnvironmentVariables.ioThreadPoolSize());
+    }
+
+    @Test
     void testRedisAddresses() {
         Assertions.assertEquals("", RedisEnvironmentVariables.redisAddresses());
     }

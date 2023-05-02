@@ -30,6 +30,7 @@ public class RedisTestExtension implements BeforeAllCallback, AfterAllCallback, 
         mockedRedisEnvironment.when(() -> RedisEnvironmentVariables.active()).thenReturn(true);
         mockedRedisEnvironment.when(() -> RedisEnvironmentVariables.redisAddress())
                 .thenReturn("redis://localhost:" + redisContainer.getMappedPort(REDIS_PORT));
+        mockedRedisEnvironment.when(() -> RedisEnvironmentVariables.ioThreadPoolSize()).thenReturn(8);
     }
 
     @Override

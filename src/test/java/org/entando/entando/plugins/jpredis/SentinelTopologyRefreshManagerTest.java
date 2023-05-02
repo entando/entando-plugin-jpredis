@@ -55,7 +55,7 @@ class SentinelTopologyRefreshManagerTest {
         Mockito.doNothing().when(pubSubConnection).addListener(listenerCaptor.capture());
         createSentinelTopologyRefreshManager();
         listenerCaptor.getValue().message("+switch-master", "+switch-master", "redismaster redis1 6379 redis2 6379");
-        Mockito.verify(cacheManager, Mockito.times(1)).updateCacheFrontend(Mockito.any());
+        Mockito.verify(cacheManager, Mockito.timeout(1000).times(1)).updateCacheFrontend(Mockito.any());
     }
 
     @Test
@@ -66,7 +66,7 @@ class SentinelTopologyRefreshManagerTest {
         Mockito.doNothing().when(pubSubConnection).addListener(listenerCaptor.capture());
         createSentinelTopologyRefreshManager();
         listenerCaptor.getValue().message("+switch-master", "+switch-master", "redismaster redis1 6379 redis2 6379");
-        Mockito.verify(cacheManager, Mockito.times(1)).updateCacheFrontend(Mockito.any());
+        Mockito.verify(cacheManager, Mockito.timeout(1000).times(1)).updateCacheFrontend(Mockito.any());
     }
 
     @Test
