@@ -17,88 +17,65 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import com.agiletec.aps.BaseTestCase;
-import com.agiletec.aps.system.SystemConstants;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import org.entando.entando.TestEntandoJndiUtils;
 import org.entando.entando.aps.system.services.cache.CacheInfoManager;
-import org.junit.jupiter.api.AfterAll;
+import org.entando.entando.plugins.jpredis.utils.RedisTestExtension;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.web.WebAppConfiguration;
 
 /**
  * Classe test del servizio gestore cache.
  *
  * @author E.Santoboni
  */
+@ExtendWith(RedisTestExtension.class)
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(locations = {
+		"classpath*:spring/testpropertyPlaceholder.xml",
+		"classpath*:spring/baseSystemConfig.xml",
+		"classpath*:spring/aps/**/**.xml",
+		"classpath*:spring/plugins/**/aps/**/**.xml",
+		"classpath*:spring/web/**.xml"
+})
+@WebAppConfiguration(value = "")
+@DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 class CacheInfoManagerIntegrationTest {
 
 	private static final String DEFAULT_CACHE = CacheInfoManager.DEFAULT_CACHE_NAME;
 
-	private CacheInfoManager cacheInfoManager = null;
-    
 	@BeforeAll
-	public static void setUpRedis() throws Exception {
-        ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command("bash", "-c", "docker-compose up -d");
-        executeCommand(processBuilder);
-        BaseTestCase.setUp();
+	static void setUp() {
+		TestEntandoJndiUtils.setupJndi();
 	}
-    
-    @BeforeEach
-    public void init() throws Exception {
-        try {
-            cacheInfoManager = (CacheInfoManager) BaseTestCase.getApplicationContext().getBean(SystemConstants.CACHE_INFO_MANAGER);
-        } catch (Throwable t) {
-            throw new Exception(t);
-        }
-    }
-    
-    @AfterAll
-    public static void tearDownRedis() throws Exception {
-        BaseTestCase.tearDown();
-        ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command("bash", "-c", "docker-compose stop && docker-compose rm -f");
-        executeCommand(processBuilder);
-    }
-    
-    private static void executeCommand(ProcessBuilder processBuilder) throws Exception {
-        try {
-            Process process = processBuilder.start();
-            StringBuilder output = new StringBuilder();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line + "\n");
-            }
-            int exitVal = process.waitFor();
-            if (exitVal == 0) {
-                System.out.println("executed!");
-                System.out.println(output);
-            } else {
-                System.out.println("Invalid exit! code " + exitVal);
-            }
-        } catch (Exception e) {
-            throw e;
-        }
-    }
-    
-    @Test
-	void testPutGetFromCache_1() {
+
+	@Autowired
+	private CacheInfoManager cacheInfoManager;
+
+	@Test
+	void testPutGetFromCache_1() throws Throwable {
 		String value = "Stringa prova";
-		String key = "Chiave_prova";
+		String key = "Chiave_prova_1";
 		this.cacheInfoManager.putInCache(DEFAULT_CACHE, key, value);
 		Object extracted = this.cacheInfoManager.getFromCache(DEFAULT_CACHE, key);
 		assertEquals(value, extracted);
 		this.cacheInfoManager.flushEntry(DEFAULT_CACHE, key);
+		synchronized (this) {
+			this.wait(1000);
+		}
 		extracted = this.cacheInfoManager.getFromCache(DEFAULT_CACHE, key);
 		assertNull(extracted);
 	}
-    
-    @Test
-	void testPutGetFromCache_2() {
-		String key = "Chiave_prova";
+
+	@Test
+	void testPutGetFromCache_2() throws Throwable {
+		String key = "Chiave_prova_2";
 		Object extracted = this.cacheInfoManager.getFromCache(DEFAULT_CACHE, key);
 		assertNull(extracted);
 		extracted = this.cacheInfoManager.getFromCache(DEFAULT_CACHE, key);
@@ -111,6 +88,9 @@ class CacheInfoManagerIntegrationTest {
 		assertNotNull(extracted);
 		assertEquals(value, extracted);
 		this.cacheInfoManager.flushEntry(DEFAULT_CACHE, key);
+		synchronized (this) {
+			this.wait(1000);
+		}
 		extracted = this.cacheInfoManager.getFromCache(DEFAULT_CACHE, key);
 		assertNull(extracted);
 	}
@@ -118,7 +98,7 @@ class CacheInfoManagerIntegrationTest {
 	@Test
 	void testPutGetFromCacheOnRefreshPeriod() throws Throwable {
 		String value = "Stringa prova";
-		String key = "Chiave prova";
+		String key = "Chiave_prova_3";
 		this.cacheInfoManager.putInCache(DEFAULT_CACHE, key, value);
 		this.cacheInfoManager.setExpirationTime(DEFAULT_CACHE, key, 2l);
 		Object extracted = this.cacheInfoManager.getFromCache(DEFAULT_CACHE, key);
@@ -133,15 +113,15 @@ class CacheInfoManagerIntegrationTest {
 	@Test
 	void testPutGetFromCacheGroup() {
 		String value = "Stringa prova";
-		String key = "Chiave prova";
-		String group1 = "group1";
-		String[] groups = {group1};
+		String key = "Chiave_prova_4";
+		String group = "group4";
+		String[] groups = {group};
 		cacheInfoManager.putInCache(DEFAULT_CACHE, key, value, groups);
 		Object extracted = cacheInfoManager.getFromCache(DEFAULT_CACHE, key);
 		assertEquals(value, extracted);
-		cacheInfoManager.flushGroup(DEFAULT_CACHE, group1);
+		cacheInfoManager.flushGroup(DEFAULT_CACHE, group);
 		extracted = cacheInfoManager.getFromCache(DEFAULT_CACHE, key);
 		assertNull(extracted);
 	}
-    
+
 }
