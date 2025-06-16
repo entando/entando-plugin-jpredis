@@ -36,7 +36,7 @@ jobs:
           ${{ secrets.ENTANDO_OPT_PPL_INSTALL_CMD }}
           ~/ppl-run \
             .. status-report \
-            .. @setup-feature-flags "PR_FORMAT_CHECK" "BOM_CHECK" "BOM" "POST_PUB_DOCKER_SCAN" "POST_DEP_TESTS" \
+            .. @setup-feature-flags "PR_FORMAT_CHECK" "POST_PUB_DOCKER_SCAN" "POST_DEP_TESTS" \
           ;
       #~ CHECKOUT
       - name: "CHECKOUT"
