@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
+import org.entando.entando.aps.system.services.cache.IFCacheWithPipeline;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.connection.RedisConnection;
@@ -49,10 +49,11 @@ import org.springframework.util.Assert;
  * @author André Prata
  * @since 2.0
  */
-class DefaultLettuceCacheWriter implements RedisCacheWriter {
+class DefaultLettuceCacheWriter implements RedisCacheWriter, IFCacheWithPipeline {
 
 	private final RedisConnectionFactory connectionFactory;
 	private final Duration sleepTime;
+	private RedisConnection pipelineConnection;
 
 	/**
 	 * @param connectionFactory must not be {@literal null}.
@@ -210,22 +211,27 @@ class DefaultLettuceCacheWriter implements RedisCacheWriter {
 	}
 
 	private <T> T execute(String name, Function<RedisConnection, T> callback) {
-		RedisConnection connection = connectionFactory.getConnection();
+		RedisConnection connection = determineConnection();
+
 		try {
 			checkAndPotentiallyWaitUntilUnlocked(name, connection);
 			return callback.apply(connection);
 		} finally {
+			if (!connection.isPipelined()) {
 			connection.close();
 		}
 	}
+	}
 
 	private void executeLockFree(Consumer<RedisConnection> callback) {
-		RedisConnection connection = connectionFactory.getConnection();
+		RedisConnection connection = determineConnection();
 		try {
 			callback.accept(connection);
 		} finally {
+			if (!connection.isPipelined()) {
 			connection.close();
 		}
+	}
 	}
 
 	private void checkAndPotentiallyWaitUntilUnlocked(String name, RedisConnection connection) {
@@ -251,4 +257,21 @@ class DefaultLettuceCacheWriter implements RedisCacheWriter {
 		return (name + "~lock").getBytes(StandardCharsets.UTF_8);
 	}
     
+	@Override
+	public void openPipeline() {
+		this.pipelineConnection = determineConnection();
+		this.pipelineConnection.openPipeline();
+	}
+
+	@Override
+	public void closePipeline() {
+		RedisConnection closingPipelineConnection = this.pipelineConnection;
+		this.pipelineConnection = null;
+		closingPipelineConnection.closePipeline();
+		closingPipelineConnection.close();
+	}
+
+	private RedisConnection determineConnection() {
+		return (pipelineConnection != null) ? pipelineConnection : connectionFactory.getConnection();
+	}
 }

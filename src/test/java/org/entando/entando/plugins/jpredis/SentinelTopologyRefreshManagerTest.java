@@ -104,7 +104,6 @@ class SentinelTopologyRefreshManagerTest {
     }
 
     private void mockRebuildCacheFrontend() {
-        Mockito.when(cacheManager.getCacheNames()).thenReturn(Collections.singletonList("cache1"));
-        Mockito.when(cacheManager.getCache("cache1")).thenReturn(Mockito.mock(LettuceCache.class));
+        // no op
     }
 }
