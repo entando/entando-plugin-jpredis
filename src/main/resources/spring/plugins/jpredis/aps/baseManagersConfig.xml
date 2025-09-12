@@ -12,7 +12,8 @@
 			http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd 
 			http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
     
-    <context:component-scan base-package="org.entando.entando.plugins.jpredis.aps.system.redis" />
+    <context:component-scan base-package="org.entando.entando.plugins.jpredis.aps.system.redis,
+        org.entando.entando.plugins.jpredis.aps.system.service.lock" />
     
     <util:set id="entandoDefaultCaches" >
         <bean class="org.entando.entando.aps.system.services.cache.CustomConcurrentMapCacheFactoryBean" 
@@ -52,5 +53,8 @@
         <bean class="org.entando.entando.aps.system.services.cache.CustomConcurrentMapCacheFactoryBean"
                       p:name="Entando_DataObjectPageMapperManager" p:store-ref="dataObjectMapperCache" />
     </util:set>
+
+    <bean id="globalLockManager" class="org.entando.entando.plugins.jpredis.aps.system.service.lock.GlobalLockManager" >
+    </bean>
     
 </beans>

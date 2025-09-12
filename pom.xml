@@ -9,7 +9,7 @@
     </parent>
     <artifactId>entando-plugin-jpredis</artifactId>
     <groupId>org.entando.entando.plugins</groupId>
-    <version>6.5.2</version>
+    <version>6.5.3</version>
     <packaging>war</packaging>
     <name>Entando Plugin: Redis Connector</name>
     <description>Enables the use of Redis as system library</description>
@@ -120,6 +120,7 @@
             <groupId>org.entando.entando</groupId>
             <artifactId>entando-engine</artifactId>
             <type>jar</type>
+            <version>6.5.5</version>
         </dependency>
         
         <dependency>
@@ -169,6 +170,7 @@
             <groupId>org.entando.entando</groupId>
             <artifactId>entando-engine</artifactId>
             <type>test-jar</type>
+            <version>6.5.5</version>
         </dependency>
         <dependency>
             <groupId>org.entando.entando</groupId>
